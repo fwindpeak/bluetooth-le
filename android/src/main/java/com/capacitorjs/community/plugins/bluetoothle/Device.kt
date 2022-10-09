@@ -348,7 +348,8 @@ class Device(
     ) {
         val key = "write|$serviceUUID|$characteristicUUID"
         callbackMap[key] = callback
-        val service = bluetoothGatt?.getService(serviceUUID)
+//        val service = bluetoothGatt?.getService(serviceUUID)
+      var service = bluetoothGatt?.let { getServiceLast(it,serviceUUID) }
         val characteristic = service?.getCharacteristic(characteristicUUID)
         if (characteristic == null) {
             reject(key, "Characteristic not found.")
@@ -364,6 +365,11 @@ class Device(
         }
         setTimeout(key, "Write timeout.", timeout)
     }
+
+   private fun getServiceLast(bluetoothGatt: BluetoothGatt,serviceUUID: UUID): BluetoothGattService? {
+      val serviceList = bluetoothGatt.services.filter { it.uuid == serviceUUID}
+      return serviceList.last()
+   }
 
     fun setNotifications(
         serviceUUID: UUID,
